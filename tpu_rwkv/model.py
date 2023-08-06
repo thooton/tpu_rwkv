@@ -375,8 +375,9 @@ def load_weights(path:str, dtype='float32', embedding_padding=0):
         if 'kernel' in path and len(weight.shape) > 1:
             weight = weight.T
 
+        weight_dtype = dtype
         if 'time_decay' in path or 'time_first' in path:
-            dtype = 'float32'
+            weight_dtype = 'float32'
         if 'embedding' in path:
             V, C = weight.shape
             padded = torch.zeros(V+embedding_padding, C)
@@ -387,7 +388,7 @@ def load_weights(path:str, dtype='float32', embedding_padding=0):
             padded = torch.zeros(C, V+embedding_padding)
             padded[:, :V] = weight
             weight = padded
-        out[path] = jnp.array(weight.detach().numpy(), dtype)
+        out[path] = jnp.array(weight.detach().numpy(), weight_dtype)
 
     out = {'params': flax.traverse_util.unflatten_dict(out, sep='.')}
     return out
